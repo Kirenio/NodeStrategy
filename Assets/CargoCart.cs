@@ -9,7 +9,7 @@ public class CargoCart : Building {
 
     void Update()
     {
-        if(Stored < Capacity)
+        if(Stored.Amount < Capacity)
         {
             transform.LookAt(Shipping.PortPos.position);
             transform.position = Vector3.MoveTowards(transform.position, Shipping.PortPos.position, Speed * Time.deltaTime);

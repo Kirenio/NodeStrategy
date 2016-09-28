@@ -2,45 +2,54 @@
 using System.Collections;
 
 public class Building : MonoBehaviour {
-    public float CurrentHealth;// { get; protected set; }
-    public float MaxHealth;// { get; protected set; }
-    public float Capacity;// { get; protected set; }
-    public float Stored;// { get; protected set; }
+    public float CurrentHealth;
+    public float MaxHealth;
+    public float Capacity;
+    public Cargo Stored;
     
     public Transform PortPos;
 
-    void Awake()
+    protected virtual void Awake()
     {
         PortPos = transform.GetChild(0).transform;
     }
-
-    // Update is called once per frame
-    public virtual float Ship (float amount)
+    
+    public virtual Cargo CargoCreate(Resource type, float amount)
     {
-        if (amount > Stored)
+        return new Cargo(type, amount);
+    }
+    public virtual Cargo Ship (float amount)
+    {
+        if (amount > Stored.Amount)
         {
-            float rAmount = Stored;
-            Stored = 0;
-            return rAmount;
+            return CargoCreate(Stored.Type, Stored.Amount);
         }
         else
         {
-            Stored -= amount;
-            return amount;
+            Stored.Amount -= amount;
+            return CargoCreate(Stored.Type, amount);
         }
     }
 
-    public virtual float Recieve(float amount)
+    public virtual Cargo Recieve(Cargo cargo)
     {
-        if (Stored + amount > Capacity)
+        if(Stored.Type == Resource.Empty || Stored.Amount == 0)
         {
-            Stored = Capacity;
-            return Stored + amount - Capacity;
+            Stored = cargo;
         }
-        else
+        if (Stored.Type == cargo.Type)
         {
-            Stored += amount;
-            return 0;
+            if (Stored.Amount + cargo.Amount > Capacity)
+            {
+                Stored.Amount = Capacity;
+                return CargoCreate(cargo.Type, cargo.Amount + Stored.Amount - Capacity);
+            }
+            else
+            {
+                Stored.Amount += cargo.Amount;
+                return CargoCreate(cargo.Type, 0);
+            }
         }
+        else return cargo;
     }
 }
