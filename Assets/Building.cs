@@ -18,17 +18,23 @@ public class Building : MonoBehaviour {
     {
         return new Cargo(type, amount);
     }
-    public virtual Cargo Ship (float amount)
+    public virtual Cargo Ship (Resource type, float amount)
     {
-        if (amount > Stored.Amount)
+        if (Stored.Type == type)
         {
-            return CargoCreate(Stored.Type, Stored.Amount);
+            if (amount > Stored.Amount)
+            {
+                float rValue = Stored.Amount;
+                Stored.Amount = 0;
+                return CargoCreate(Stored.Type, rValue);
+            }
+            else
+            {
+                Stored.Amount -= amount;
+                return CargoCreate(Stored.Type, amount);
+            }
         }
-        else
-        {
-            Stored.Amount -= amount;
-            return CargoCreate(Stored.Type, amount);
-        }
+        return CargoCreate(Resource.Empty, 0);
     }
 
     public virtual Cargo Recieve(Cargo cargo)
@@ -36,8 +42,9 @@ public class Building : MonoBehaviour {
         if(Stored.Type == Resource.Empty || Stored.Amount == 0)
         {
             Stored = cargo;
+            return CargoCreate(cargo.Type, 0);
         }
-        if (Stored.Type == cargo.Type)
+        else if (Stored.Type == cargo.Type)
         {
             if (Stored.Amount + cargo.Amount > Capacity)
             {
