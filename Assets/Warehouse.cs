@@ -3,8 +3,22 @@ using System.Collections.Generic;
 
 public class Warehouse : Building {
     public new Dictionary<Resource, Cargo> Stored = new Dictionary<Resource, Cargo>();
-    float StoredAmount = 0;
-    
+
+    void Update()
+    {
+        if(Input.GetKeyUp(KeyCode.T))
+        {
+            Recieve(CargoCreate(Resource.DataCrystal, 1));
+        }
+        if(Input.GetKeyUp(KeyCode.Y))
+        {
+            Recieve(CargoCreate(Resource.DataCrystal, 1000000));
+        }
+    }
+    protected override void LogRecieved(Cargo cargo)
+    {
+        Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.", gameObject.name, Stored[cargo.Type].Amount, cargo.Type, StoredAmount, Capacity));
+    }
     public override Cargo Ship(Resource type, float amount)
     {
         if (Stored.ContainsKey(type))
@@ -24,10 +38,6 @@ public class Warehouse : Building {
         else return CargoCreate(type, 0);
     }
 
-    protected virtual void LogRecieved(Cargo cargo)
-    {
-        Debug.Log(string.Format("{0} {1}\nUsed {2} out of {3} space.", Stored[cargo.Type].Amount, Stored[cargo.Type].Type, StoredAmount, Capacity));
-    }
     public override Cargo Recieve(Cargo cargo)
     {
         if (StoredAmount + cargo.Amount <= Capacity)
@@ -47,10 +57,10 @@ public class Warehouse : Building {
                 return CargoCreate(cargo.Type, 0);
             }
         }
-        else if(StoredAmount + cargo.Amount > Capacity)
+        else if (StoredAmount + cargo.Amount > Capacity)
         {
             float spaceFree = Capacity - StoredAmount;
-            if(spaceFree > 0)
+            if (spaceFree > 0)
             {
                 if (Stored.ContainsKey(cargo.Type))
                 {
@@ -68,6 +78,7 @@ public class Warehouse : Building {
                 }
             }
         }
+        Debug.Log(string.Format("{0}: Cargo Refused - {1} {2}. Storage {3}/{4}",gameObject.name, cargo.Amount, cargo.Type, StoredAmount, Capacity));
         return cargo;
     }
 

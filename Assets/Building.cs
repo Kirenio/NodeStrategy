@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class Building : MonoBehaviour {
     public float CurrentHealth;
     public float MaxHealth;
+    public Dictionary<Resource, float> Stored = new Dictionary<Resource, float>();
+    public float StoredAmount = 0;
     public float Capacity;
-    public Cargo Stored;
-    
+
     public Transform PortPos;
 
     protected virtual void Awake()
@@ -18,45 +19,73 @@ public class Building : MonoBehaviour {
     {
         return new Cargo(type, amount);
     }
+
     public virtual Cargo Ship (Resource type, float amount)
     {
-        if (Stored.Type == type)
+        if (Stored.ContainsKey(type))
         {
-            if (amount > Stored.Amount)
+            if (amount > Stored[type])
             {
-                float rValue = Stored.Amount;
-                Stored.Amount = 0;
-                return CargoCreate(Stored.Type, rValue);
+                Cargo rValue = CargoCreate(type, Stored[type]);
+                Stored[type] = 0;
+                StoredAmount = 0;
+                return rValue;
             }
             else
             {
-                Stored.Amount -= amount;
-                return CargoCreate(Stored.Type, amount);
+                Stored[type] -= amount;
+                StoredAmount -= amount;
+                return CargoCreate(type, amount);
             }
         }
-        return CargoCreate(Resource.Empty, 0);
+        else return CargoCreate(Resource.Empty, 0);
+    }
+
+    protected virtual void LogRecieved(Cargo cargo)
+    {
+        Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",gameObject.name, Stored[cargo.Type], cargo.Type, StoredAmount, Capacity));
     }
 
     public virtual Cargo Recieve(Cargo cargo)
     {
-        if(Stored.Type == Resource.Empty || Stored.Amount == 0)
+        if (StoredAmount + cargo.Amount <= Capacity)
         {
-            Stored = cargo;
-            return CargoCreate(cargo.Type, 0);
-        }
-        else if (Stored.Type == cargo.Type)
-        {
-            if (Stored.Amount + cargo.Amount > Capacity)
+            if (Stored.ContainsKey(cargo.Type))
             {
-                Stored.Amount = Capacity;
-                return CargoCreate(cargo.Type, cargo.Amount + Stored.Amount - Capacity);
+                Stored[cargo.Type] = Stored[cargo.Type] + cargo.Amount;
+                StoredAmount += cargo.Amount;
+                LogRecieved(cargo);
+                return CargoCreate(cargo.Type, 0);
             }
             else
             {
-                Stored.Amount += cargo.Amount;
+                Stored.Add(cargo.Type, cargo.Amount);
+                StoredAmount += cargo.Amount;
+                LogRecieved(cargo);
                 return CargoCreate(cargo.Type, 0);
             }
         }
-        else return cargo;
+        else if (StoredAmount + cargo.Amount > Capacity)
+        {
+            float spaceFree = Capacity - StoredAmount;
+            if (spaceFree > 0)
+            {
+                if (Stored.ContainsKey(cargo.Type))
+                {
+                    Stored[cargo.Type] = Stored[cargo.Type] + spaceFree;
+                    StoredAmount += spaceFree;
+                    LogRecieved(cargo);
+                    return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
+                }
+                else
+                {
+                    Stored.Add(cargo.Type, spaceFree);
+                    StoredAmount += spaceFree;
+                    LogRecieved(cargo);
+                    return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
+                }
+            }
+        }
+        return cargo;
     }
 }

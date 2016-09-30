@@ -11,13 +11,13 @@ public class CargoCart : Building {
 
     void Update()
     {
-        if(Stored.Amount == 0)
+        if(StoredAmount == 0)
         {
             transform.LookAt(Shipping.PortPos.position);
             transform.position = Vector3.MoveTowards(transform.position, Shipping.PortPos.position, Speed * Time.deltaTime);
             if(transform.position == Shipping.PortPos.position)
             {
-                Stored = Shipping.Ship(ResourceToShip, Capacity);
+                Recieve(Shipping.Ship(ResourceToShip, Capacity));
             }
         }
         else
@@ -26,7 +26,7 @@ public class CargoCart : Building {
             transform.position = Vector3.MoveTowards(transform.position, Recieving.PortPos.position, Speed * Time.deltaTime);
             if(transform.position == Recieving.PortPos.position)
             {
-                Stored = Recieving.Recieve(Stored);
+                Recieving.Recieve(Ship(ResourceToShip, Capacity));
             }
         }
     }

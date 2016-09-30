@@ -8,21 +8,21 @@ public class Extractor : Building {
     protected override void Awake()
     {
         base.Awake();
-        Stored = CargoCreate(producedResource, 0);
+        Recieve(CargoCreate(producedResource, 0));
     }
 
     void Update()
     {
-        if(Stored.Type == producedResource)
+        if(Stored.ContainsKey(producedResource))
         {
             float extractedAmount = extractionRate * Time.deltaTime;
-            if (Stored.Amount + extractedAmount < Capacity)
+            if (Stored[producedResource] + extractedAmount < Capacity)
             {
-                Stored.Amount += extractedAmount;
+                Stored[producedResource] += extractedAmount;
             }
             else
             {
-                Stored.Amount = Capacity;
+                Stored[producedResource] = Capacity;
             }
         }
     }
