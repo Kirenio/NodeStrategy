@@ -23,20 +23,27 @@ public class Manufactory : Building
             }
         }
 	}
-
+    protected virtual void LogProduced()
+    {
+        if(LogActivity)
+        Debug.Log(string.Format("{0}: Produced {1} {2}\nUsed {3} out of {4} space.",
+            gameObject.name, AmountProduced, Production, Stored[Production], ProductCapacity));
+    }
     protected virtual void Produce()
     {
         if(Stored.ContainsKey(Production))
         {
             Stored[Requirements] -= AmountRequired;
             Stored[Production] += AmountProduced;
-            StoredAmount += AmountProduced - AmountRequired;
+            StoredAmount -= AmountRequired;
         }
         else
         {
             Stored[Requirements] -= AmountRequired;
             Stored.Add(Production, AmountProduced);
-            StoredAmount += AmountProduced - AmountRequired;
+            StoredAmount -= AmountRequired;
+
         }
+        LogProduced();
     }
 }

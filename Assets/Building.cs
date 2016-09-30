@@ -10,6 +10,8 @@ public class Building : MonoBehaviour {
 
     public Transform PortPos;
 
+    public bool LogActivity = false;
+
     protected virtual void Awake()
     {
         PortPos = transform.GetChild(0).transform;
@@ -43,7 +45,20 @@ public class Building : MonoBehaviour {
 
     protected virtual void LogRecieved(Cargo cargo)
     {
-        Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",gameObject.name, Stored[cargo.Type], cargo.Type, StoredAmount, Capacity));
+        if(LogActivity)
+            Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",
+                gameObject.name, Stored[cargo.Type], cargo.Type, StoredAmount, Capacity));
+    }
+
+    public virtual void LogContent()
+    {
+        string content;
+        content = gameObject.name + ": ";
+        foreach(KeyValuePair<Resource,float> entry in Stored)
+        {
+            content += string.Format("{0} {1}\n",entry.Value, entry.Key);
+        }
+        Debug.Log(content);
     }
 
     public virtual Cargo Recieve(Cargo cargo)

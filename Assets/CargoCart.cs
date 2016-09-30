@@ -26,7 +26,7 @@ public class CargoCart : Building {
             transform.position = Vector3.MoveTowards(transform.position, Recieving.PortPos.position, Speed * Time.deltaTime);
             if(transform.position == Recieving.PortPos.position)
             {
-                Recieving.Recieve(Ship(ResourceToShip, Capacity));
+                Recieve(Recieving.Recieve(Ship(ResourceToShip, Capacity)));
             }
         }
     }

@@ -17,7 +17,9 @@ public class Warehouse : Building {
     }
     protected override void LogRecieved(Cargo cargo)
     {
-        Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.", gameObject.name, Stored[cargo.Type].Amount, cargo.Type, StoredAmount, Capacity));
+        if(LogActivity)
+            Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",
+                gameObject.name, Stored[cargo.Type].Amount, cargo.Type, StoredAmount, Capacity));
     }
     public override Cargo Ship(Resource type, float amount)
     {
