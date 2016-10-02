@@ -9,6 +9,11 @@ public class CargoCart : Building {
     public Building Shipping;
     public Building Recieving;
 
+    protected override void Awake()
+    {
+
+    }
+
     void Update()
     {
         if(StoredAmount == 0)

@@ -29,8 +29,8 @@ public class Building : MonoBehaviour {
             if (amount > Stored[type])
             {
                 Cargo rValue = CargoCreate(type, Stored[type]);
+                StoredAmount -= Stored[type];
                 Stored[type] = 0;
-                StoredAmount = 0;
                 return rValue;
             }
             else
@@ -50,11 +50,18 @@ public class Building : MonoBehaviour {
                 gameObject.name, Stored[cargo.Type], cargo.Type, StoredAmount, Capacity));
     }
 
+    protected virtual void LogRecieved(Resource type, float amount)
+    {
+        if (LogActivity)
+            Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",
+                gameObject.name, Stored[type], amount, StoredAmount, Capacity));
+    }
+
     public virtual void LogContent()
     {
         string content;
-        content = gameObject.name + ": ";
-        foreach(KeyValuePair<Resource,float> entry in Stored)
+        content = string.Format("{0}: Used {1} out of {2} space. ", gameObject.name, StoredAmount,Capacity);
+        foreach (KeyValuePair<Resource,float> entry in Stored)
         {
             content += string.Format("{0} {1}\n",entry.Value, entry.Key);
         }
@@ -89,14 +96,14 @@ public class Building : MonoBehaviour {
                 {
                     Stored[cargo.Type] = Stored[cargo.Type] + spaceFree;
                     StoredAmount += spaceFree;
-                    LogRecieved(cargo);
+                    LogRecieved(cargo.Type, spaceFree);
                     return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
                 }
                 else
                 {
                     Stored.Add(cargo.Type, spaceFree);
                     StoredAmount += spaceFree;
-                    LogRecieved(cargo);
+                    LogRecieved(cargo.Type, spaceFree);
                     return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
                 }
             }
