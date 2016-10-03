@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Manufactory : Building
 {
@@ -7,7 +6,6 @@ public class Manufactory : Building
     public Resource Production;
     public float AmountRequired;
     public float AmountProduced;
-    public int ProductCapacity;
 
     protected override void Awake()
     {
@@ -17,33 +15,29 @@ public class Manufactory : Building
     protected virtual void Update () {
         if (Stored.ContainsKey(Requirements))
         {
-            if (AmountRequired <= Stored[Requirements] && Stored[Production] < ProductCapacity)
+            if (AmountRequired <= Stored[Requirements])
             {
                 Produce();
             }
         }
 	}
+    
     protected virtual void LogProduced()
     {
-        if(LogActivity)
         Debug.Log(string.Format("{0}: Produced {1} {2}\nUsed {3} out of {4} space.",
-            gameObject.name, AmountProduced, Production, Stored[Production], ProductCapacity));
+            gameObject.name, AmountProduced, Production, StoredAmount, Capacity));
     }
     protected virtual void Produce()
     {
-        if(Stored.ContainsKey(Production))
-        {
-            Stored[Requirements] -= AmountRequired;
-            Stored[Production] += AmountProduced;
-            StoredAmount -= AmountRequired;
-        }
-        else
-        {
-            Stored[Requirements] -= AmountRequired;
-            Stored.Add(Production, AmountProduced);
-            StoredAmount -= AmountRequired;
+        Stored[Requirements] -= AmountRequired;
 
-        }
-        LogProduced();
+        if (Stored.ContainsKey(Production))
+            Stored[Production] += AmountProduced;
+        else
+            Stored.Add(Production, AmountProduced);
+
+        StoredAmount += AmountProduced - AmountRequired;
+
+        if (LogActivity) LogProduced();
     }
 }

@@ -15,6 +15,7 @@ public class Building : MonoBehaviour {
     protected virtual void Awake()
     {
         PortPos = transform.GetChild(0).transform;
+        CurrentHealth = MaxHealth;
     }
     
     public virtual Cargo CargoCreate(Resource type, float amount)
@@ -45,14 +46,12 @@ public class Building : MonoBehaviour {
 
     protected virtual void LogRecieved(Cargo cargo)
     {
-        if(LogActivity)
             Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",
                 gameObject.name, Stored[cargo.Type], cargo.Type, StoredAmount, Capacity));
     }
 
     protected virtual void LogRecieved(Resource type, float amount)
     {
-        if (LogActivity)
             Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",
                 gameObject.name, Stored[type], amount, StoredAmount, Capacity));
     }
@@ -73,19 +72,15 @@ public class Building : MonoBehaviour {
         if (StoredAmount + cargo.Amount <= Capacity)
         {
             if (Stored.ContainsKey(cargo.Type))
-            {
                 Stored[cargo.Type] = Stored[cargo.Type] + cargo.Amount;
-                StoredAmount += cargo.Amount;
-                LogRecieved(cargo);
-                return CargoCreate(cargo.Type, 0);
-            }
             else
-            {
                 Stored.Add(cargo.Type, cargo.Amount);
+
                 StoredAmount += cargo.Amount;
-                LogRecieved(cargo);
+
+                if (LogActivity) LogRecieved(cargo);
+
                 return CargoCreate(cargo.Type, 0);
-            }
         }
         else if (StoredAmount + cargo.Amount > Capacity)
         {
@@ -93,19 +88,15 @@ public class Building : MonoBehaviour {
             if (spaceFree > 0)
             {
                 if (Stored.ContainsKey(cargo.Type))
-                {
                     Stored[cargo.Type] = Stored[cargo.Type] + spaceFree;
-                    StoredAmount += spaceFree;
-                    LogRecieved(cargo.Type, spaceFree);
-                    return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
-                }
                 else
-                {
                     Stored.Add(cargo.Type, spaceFree);
-                    StoredAmount += spaceFree;
-                    LogRecieved(cargo.Type, spaceFree);
-                    return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
-                }
+
+                StoredAmount += spaceFree;
+
+                if (LogActivity) LogRecieved(cargo.Type, spaceFree);
+
+                return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
             }
         }
         return cargo;

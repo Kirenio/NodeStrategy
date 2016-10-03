@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public enum Resource { Empty, Crystal, DataCrystal }
+﻿public enum Resource { Empty, Crystal, BlackSand, DataCrystal }
 
 [System.Serializable]
 public struct Cargo

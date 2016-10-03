@@ -1,40 +1,73 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿
+using UnityEngine;
 
 public class Silo : Building
 {
+    public int Sections = 1;
+    float SectionSize;
+
     protected override void Awake()
     {
         base.Awake();
+        SectionSize = SectionCalculateSize();
     }
+
     public override Cargo Recieve(Cargo cargo)
     {
-        if (Stored.ContainsKey(cargo.Type) && Stored[cargo.Type] == StoredAmount)
+        if (Stored.ContainsKey(cargo.Type) && Stored[cargo.Type] != 0)
         {
-            if (StoredAmount + cargo.Amount <= Capacity)
+            if (Stored[cargo.Type] + cargo.Amount <= SectionSize)
             {
-                Stored[cargo.Type] = Stored[cargo.Type] + cargo.Amount;
+                Stored[cargo.Type] += cargo.Amount;
                 StoredAmount += cargo.Amount;
-                LogRecieved(cargo);
+
+                if (LogActivity) LogRecieved(cargo);
+
                 return CargoCreate(cargo.Type, 0);
             }
             else
             {
-                float spaceFree = Capacity - StoredAmount;
+                float spaceFree = SectionSize - Stored[cargo.Type];
+                if(spaceFree > 0)
+                {
+                    Stored[cargo.Type] += spaceFree;
+                    StoredAmount += spaceFree;
 
-                Stored[cargo.Type] = Stored[cargo.Type] + spaceFree;
-                StoredAmount += spaceFree;
-                LogRecieved(cargo.Type, spaceFree);
-                return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
+                    if (LogActivity) LogRecieved(cargo.Type, spaceFree);
+
+                    return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
+                }
+                return cargo;
             }
         }
-        else if (StoredAmount == 0)
+        else if (SectionsOccopied() < Sections)
         {
-            Stored.Add(cargo.Type, cargo.Amount);
+            if (Stored.ContainsKey(cargo.Type))
+                Stored[cargo.Type] += cargo.Amount;
+            else
+                Stored.Add(cargo.Type, cargo.Amount);
+
             StoredAmount += cargo.Amount;
-            LogRecieved(cargo);
+
+            if (LogActivity) LogRecieved(cargo);
+
             return CargoCreate(cargo.Type, 0);
         }
         return cargo;
+    }
+
+    int SectionsOccopied()
+    {
+        int value = 0;
+        foreach(float entry in Stored.Values)
+        {
+            if (entry > 0) value++;
+        }
+        return value;
+    }
+
+    float SectionCalculateSize()
+    {
+        return Capacity / Sections;
     }
 }
