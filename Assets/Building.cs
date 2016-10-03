@@ -62,7 +62,8 @@ public class Building : MonoBehaviour {
         content = string.Format("{0}: Used {1} out of {2} space. ", gameObject.name, StoredAmount,Capacity);
         foreach (KeyValuePair<Resource,float> entry in Stored)
         {
-            content += string.Format("{0} {1}\n",entry.Value, entry.Key);
+            if(entry.Value > 0)
+                content += string.Format("{0} {1}\n",entry.Value, entry.Key);
         }
         Debug.Log(content);
     }
