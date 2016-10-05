@@ -15,16 +15,24 @@ public class Controls : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
+                if (Selection != null) Selection.InventoryChanged -= UpdateToolTip;
                 if (hit.transform.tag == "Moveable")
                 {
                     PathTracker.SetCartToTrack(hit.transform.GetComponent<CargoCart>());
                 }
 
                 Selection = hit.transform.GetComponent<Building>();
-                if (Selection != null) UnitInfo.text = string.Format("{0}\n{1}/{2} HP\n{3}/{4} Space",Selection.name,Selection.CurrentHealth,Selection.MaxHealth,Selection.StoredAmount,Selection.Capacity);
+                if (Selection != null)
+                {
+                    UnitInfo.transform.parent.gameObject.SetActive(true);
+                    Selection.InventoryChanged += UpdateToolTip;
+                    UpdateToolTip();
+                }
                 else
                 {
+                    if (Selection != null) Selection.InventoryChanged -= UpdateToolTip;
                     Selection = null;
+                    UnitInfo.transform.parent.gameObject.SetActive(false);
                     PathTracker.gameObject.SetActive(false);
                 }
             }
@@ -39,5 +47,10 @@ public class Controls : MonoBehaviour
                 if (target != null) target.LogContent();
             }
         }
+    }
+
+    void UpdateToolTip()
+    {
+        UnitInfo.text = string.Format("{0}\n{1}/{2} HP\n{3}/{4} Space", Selection.name, (int)Selection.CurrentHealth, Selection.MaxHealth, (int)Selection.StoredAmount, Selection.Capacity);
     }
 }

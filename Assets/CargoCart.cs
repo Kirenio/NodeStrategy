@@ -10,7 +10,7 @@ public class CargoCart : Building {
 
     protected override void Awake()
     {
-
+        CurrentHealth = MaxHealth;
     }
 
     void Update()

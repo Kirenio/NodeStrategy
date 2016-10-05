@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+public delegate void BuildingEventHandler();
+
 public class Building : MonoBehaviour {
     public float CurrentHealth;
     public float MaxHealth;
@@ -11,6 +13,12 @@ public class Building : MonoBehaviour {
     public Transform PortPos;
 
     public bool LogActivity = false;
+
+    public event BuildingEventHandler InventoryChanged;
+    protected virtual void OnInventoryChanged()
+    {
+        if (InventoryChanged != null) InventoryChanged();
+    }
 
     protected virtual void Awake()
     {
@@ -32,12 +40,14 @@ public class Building : MonoBehaviour {
                 Cargo rValue = CargoCreate(type, Stored[type]);
                 StoredAmount -= Stored[type];
                 Stored[type] = 0;
+                if (InventoryChanged != null) InventoryChanged();
                 return rValue;
             }
             else
             {
                 Stored[type] -= amount;
                 StoredAmount -= amount;
+                if (InventoryChanged != null) InventoryChanged();
                 return CargoCreate(type, amount);
             }
         }
@@ -81,7 +91,8 @@ public class Building : MonoBehaviour {
 
                 if (LogActivity) LogRecieved(cargo);
 
-                return CargoCreate(cargo.Type, 0);
+            if(InventoryChanged != null) InventoryChanged();
+            return CargoCreate(cargo.Type, 0);
         }
         else if (StoredAmount + cargo.Amount > Capacity)
         {
@@ -97,6 +108,7 @@ public class Building : MonoBehaviour {
 
                 if (LogActivity) LogRecieved(cargo.Type, spaceFree);
 
+                if (InventoryChanged != null) InventoryChanged();
                 return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
             }
         }

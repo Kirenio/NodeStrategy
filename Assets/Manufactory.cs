@@ -38,6 +38,7 @@ public class Manufactory : Building
 
         StoredAmount += AmountProduced - AmountRequired;
 
-        if (LogActivity) LogProduced();
+        OnInventoryChanged();
+        if (LogActivity) LogProduced();        
     }
 }

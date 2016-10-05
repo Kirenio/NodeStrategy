@@ -24,12 +24,14 @@ public class Extractor : Building {
                 Stored[producedResource] += extractedAmount;
                 StoredAmount += extractedAmount;
                 if (LogActivity) LogExtracted(extractedAmount);
+                OnInventoryChanged();
             }
             else
             {
                 if (LogActivity) LogExtracted(Capacity - StoredAmount);
                 Stored[producedResource] = Capacity;
                 StoredAmount = Capacity;
+                OnInventoryChanged();
             }
         }
     }

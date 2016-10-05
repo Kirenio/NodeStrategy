@@ -23,6 +23,7 @@ public class Silo : Building
 
                 if (LogActivity) LogRecieved(cargo);
 
+                OnInventoryChanged();
                 return CargoCreate(cargo.Type, 0);
             }
             else
@@ -35,6 +36,7 @@ public class Silo : Building
 
                     if (LogActivity) LogRecieved(cargo.Type, spaceFree);
 
+                    OnInventoryChanged();
                     return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
                 }
                 return cargo;
@@ -51,6 +53,7 @@ public class Silo : Building
 
             if (LogActivity) LogRecieved(cargo);
 
+            OnInventoryChanged();
             return CargoCreate(cargo.Type, 0);
         }
         return cargo;
