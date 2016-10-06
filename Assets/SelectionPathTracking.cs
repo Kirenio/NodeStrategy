@@ -7,7 +7,6 @@ public class SelectionPathTracking : MonoBehaviour {
 
     public void SetCartToTrack(CargoCart cart)
     {
-        Debug.Log("Setting object to track");
         SelectedObject = cart;
         LRPointer.SetPosition(0, SelectedObject.Shipping.transform.position);
         LRPointer.SetPosition(2, SelectedObject.Recieving.transform.position);

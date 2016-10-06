@@ -29,3 +29,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+/Assets/OldCameraSetup.unity
+/Assets/OldCameraSetup.unity.meta

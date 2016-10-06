@@ -3,12 +3,25 @@ using UnityEngine.UI;
 
 public class Controls : MonoBehaviour
 {
+    public Transform CameraAnchor;
+    public float mouseSensitivity = 0.3f;
+    public float keyboardScrollSpeed = 2f;
     Building Selection;
     public Text UnitInfo;
     public SelectionPathTracking PathTracker;
     
     void Update()
     {
+        if (Input.GetKey(KeyCode.W)) CameraAnchor.position += Vector3.forward * keyboardScrollSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.S)) CameraAnchor.position += -Vector3.forward * keyboardScrollSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.A)) CameraAnchor.position += -Vector3.right * keyboardScrollSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.D)) CameraAnchor.position += Vector3.right * keyboardScrollSpeed * Time.deltaTime;
+
+        if (Input.GetMouseButton(0))
+        {
+            CameraAnchor.position += new Vector3(-Input.GetAxis("Mouse X"), 0, -Input.GetAxis("Mouse Y")) * mouseSensitivity;
+        }
+
         if (Input.GetMouseButtonUp(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
