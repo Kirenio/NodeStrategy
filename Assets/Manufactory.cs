@@ -12,6 +12,7 @@ public class Manufactory : Building
         base.Awake();
         Stored.Add(Production, 0);
     }
+
     protected virtual void Update () {
         if (Stored.ContainsKey(Requirements))
         {
@@ -21,7 +22,7 @@ public class Manufactory : Building
             }
         }
 	}
-    
+
     protected virtual void LogProduced()
     {
         Debug.Log(string.Format("{0}: Produced {1} {2}\nUsed {3} out of {4} space.",

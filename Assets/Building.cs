@@ -54,30 +54,6 @@ public class Building : MonoBehaviour {
         else return CargoCreate(Resource.Empty, 0);
     }
 
-    protected virtual void LogRecieved(Cargo cargo)
-    {
-            Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",
-                gameObject.name, Stored[cargo.Type], cargo.Type, StoredAmount, Capacity));
-    }
-
-    protected virtual void LogRecieved(Resource type, float amount)
-    {
-            Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",
-                gameObject.name, Stored[type], amount, StoredAmount, Capacity));
-    }
-
-    public virtual void LogContent()
-    {
-        string content;
-        content = string.Format("{0}: Used {1} out of {2} space. ", gameObject.name, StoredAmount,Capacity);
-        foreach (KeyValuePair<Resource,float> entry in Stored)
-        {
-            if(entry.Value > 0)
-                content += string.Format("{0} {1}\n",entry.Value, entry.Key);
-        }
-        Debug.Log(content);
-    }
-
     public virtual Cargo Recieve(Cargo cargo)
     {
         if (StoredAmount + cargo.Amount <= Capacity)
@@ -113,5 +89,29 @@ public class Building : MonoBehaviour {
             }
         }
         return cargo;
+    }
+    
+    protected virtual void LogRecieved(Cargo cargo)
+    {
+        Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",
+            gameObject.name, Stored[cargo.Type], cargo.Type, StoredAmount, Capacity));
+    }
+
+    protected virtual void LogRecieved(Resource type, float amount)
+    {
+        Debug.Log(string.Format("{0}: {1} {2}\nUsed {3} out of {4} space.",
+            gameObject.name, Stored[type], amount, StoredAmount, Capacity));
+    }
+
+    public virtual void LogContent()
+    {
+        string content;
+        content = string.Format("{0}: Used {1} out of {2} space. ", gameObject.name, StoredAmount, Capacity);
+        foreach (KeyValuePair<Resource, float> entry in Stored)
+        {
+            if (entry.Value > 0)
+                content += string.Format("{0} {1}\n", entry.Value, entry.Key);
+        }
+        Debug.Log(content);
     }
 }

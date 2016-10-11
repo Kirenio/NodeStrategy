@@ -34,4 +34,11 @@ public class CargoCart : Building {
             }
         }
     }
+
+    public virtual void DumpCargo()
+    {
+        Stored.Clear();
+        StoredAmount = 0;
+        OnInventoryChanged();
+    }
 }

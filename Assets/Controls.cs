@@ -2,6 +2,10 @@
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+public delegate void ControlsEvenHandler();
+public delegate void ControlsEvenHandlerBuilding(Building sender);
+public delegate void ControlsEvenHandlerCargoCart(CargoCart sender);
+
 public class Controls : MonoBehaviour
 {
     public Transform CameraAnchor;
@@ -11,8 +15,11 @@ public class Controls : MonoBehaviour
     Building Selection;
     public Text UnitInfo;
     public SelectionPathTracking PathTracker;
-    GameObject buildingToBuild;
-    public GameObject BuildingToBuild { get { return buildingToBuild; } set { buildingToBuild = value; Debug.Log("Set build to: " + value); } }
+    public GameObject BuildingToBuild { get;  set;  }
+
+    public event ControlsEvenHandler Unselected;
+    public event ControlsEvenHandlerBuilding BuildingSelected;
+    public event ControlsEvenHandlerCargoCart CargoCartSelected;
     
     void Update()
     {
@@ -37,7 +44,9 @@ public class Controls : MonoBehaviour
                 if (Selection != null) Selection.InventoryChanged -= UpdateToolTip;
                 if (hit.transform.tag == "Moveable")
                 {
-                    PathTracker.SetCartToTrack(hit.transform.GetComponent<CargoCart>());
+                    CargoCart selectedCart = hit.transform.GetComponent<CargoCart>();
+                    PathTracker.SetCartToTrack(selectedCart);
+                    if (CargoCartSelected != null) CargoCartSelected(selectedCart);
                 }
 
                 Selection = hit.transform.GetComponent<Building>();
@@ -49,8 +58,12 @@ public class Controls : MonoBehaviour
                 }
                 else
                 {
-                    if (Selection != null) Selection.InventoryChanged -= UpdateToolTip;
+                    if (Selection != null)
+                    {
+                        Selection.InventoryChanged -= UpdateToolTip;
+                    }
                     Selection = null;
+                    if (Unselected != null) Unselected();
                     UnitInfo.transform.parent.gameObject.SetActive(false);
                     PathTracker.gameObject.SetActive(false);
                 }
@@ -82,11 +95,16 @@ public class Controls : MonoBehaviour
                 }
             }
         }
-        Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize += Input.GetAxis("Mouse ScrollWheel") * scrollMultiplier,1,20);
+        Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize -= Input.GetAxis("Mouse ScrollWheel") * scrollMultiplier,1,20);
     }
 
     void UpdateToolTip()
     {
         UnitInfo.text = string.Format("{0}\n{1}/{2} HP\n{3}/{4} Space", Selection.name, (int)Selection.CurrentHealth, Selection.MaxHealth, (int)Selection.StoredAmount, Selection.Capacity);
+    }
+
+    public void TransferCamera(Vector3 value)
+    {
+        CameraAnchor.position = new Vector3(value.x, 0, value.z - 45);
     }
 }
