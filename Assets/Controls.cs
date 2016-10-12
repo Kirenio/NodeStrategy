@@ -16,6 +16,7 @@ public class Controls : MonoBehaviour
     public Text UnitInfo;
     public SelectionPathTracking PathTracker;
     public GameObject BuildingToBuild { get;  set;  }
+    public bool InTargetSelectionMode = false;
 
     public event ControlsEvenHandler Unselected;
     public event ControlsEvenHandlerBuilding BuildingSelected;
@@ -92,6 +93,20 @@ public class Controls : MonoBehaviour
                 if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
                 {
                     Instantiate(BuildingToBuild, hit.point, Quaternion.identity);
+                }
+            }
+            if(InTargetSelectionMode)
+            {
+                Debug.Log("In Targeting code");
+                RaycastHit hit;
+                if(Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
+                {
+                    Building target = hit.transform.gameObject.GetComponent<Building>();
+                    if (target != null)
+                    {
+                        BuildingSelected(target);
+                        InTargetSelectionMode = false;
+                    }
                 }
             }
         }
