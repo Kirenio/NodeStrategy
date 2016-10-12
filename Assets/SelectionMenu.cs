@@ -9,6 +9,7 @@ public class SelectionMenu : MonoBehaviour {
     public Text ShippingButtonText;
     public Text RecievingButtonText;
     public Text ResourceButtonText;
+    public Toggle PauseButton;
     CargoCart cart;
 
     void Awake () {
@@ -24,6 +25,7 @@ public class SelectionMenu : MonoBehaviour {
         ShippingButtonText.text = cart.Shipping.name;
         RecievingButtonText.text = cart.Recieving.name;
         ResourceButtonText.text = cart.ResourceToShip.ToString();
+        PauseButton.isOn = cart.Paused;
     }
 
     void hideMenu()
@@ -47,5 +49,10 @@ public class SelectionMenu : MonoBehaviour {
     public void OrderDumpCargo()
     {
         cart.DumpCargo();
+    }
+
+    public void PauseCart()
+    {
+        cart.Paused = PauseButton.isOn;
     }
 }

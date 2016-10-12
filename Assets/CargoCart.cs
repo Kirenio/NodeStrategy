@@ -2,6 +2,7 @@
 
 public class CargoCart : Building {
     public float Speed;
+    public bool Paused = false;
 
     public Resource ResourceToShip;
 
@@ -15,11 +16,13 @@ public class CargoCart : Building {
 
     void Update()
     {
-        if(StoredAmount == 0)
+        if (Paused) return;
+
+        if (StoredAmount == 0)
         {
             transform.LookAt(Shipping.PortPos.position);
             transform.position = Vector3.MoveTowards(transform.position, Shipping.PortPos.position, Speed * Time.deltaTime);
-            if(transform.position == Shipping.PortPos.position)
+            if (transform.position == Shipping.PortPos.position)
             {
                 Recieve(Shipping.Ship(ResourceToShip, Capacity));
             }
@@ -28,7 +31,7 @@ public class CargoCart : Building {
         {
             transform.LookAt(Recieving.PortPos.position);
             transform.position = Vector3.MoveTowards(transform.position, Recieving.PortPos.position, Speed * Time.deltaTime);
-            if(transform.position == Recieving.PortPos.position)
+            if (transform.position == Recieving.PortPos.position)
             {
                 Recieve(Recieving.Recieve(Ship(ResourceToShip, Capacity)));
             }
