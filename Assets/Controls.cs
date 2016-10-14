@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 public delegate void ControlsEvenHandler();
@@ -13,7 +12,6 @@ public class Controls : MonoBehaviour
     public float mouseSensitivity = 0.3f;
     public float keyboardScrollSpeed = 2f;
     Building Selection;
-    public Text UnitInfo;
     public SelectionPathTracking PathTracker;
     public GameObject BuildingToBuild { get;  set;  }
     public bool InTargetSelectionMode = false;
@@ -42,30 +40,23 @@ public class Controls : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
-                if (Selection != null) Selection.InventoryChanged -= UpdateToolTip;
                 if (hit.transform.tag == "Moveable")
                 {
                     CargoCart selectedCart = hit.transform.GetComponent<CargoCart>();
                     PathTracker.SetCartToTrack(selectedCart);
                     if (CargoCartSelected != null) CargoCartSelected(selectedCart);
+                    return;
                 }
 
                 Selection = hit.transform.GetComponent<Building>();
                 if (Selection != null)
                 {
-                    UnitInfo.transform.parent.gameObject.SetActive(true);
-                    Selection.InventoryChanged += UpdateToolTip;
-                    UpdateToolTip();
+                    if(BuildingSelected != null) BuildingSelected(Selection);
                 }
                 else
                 {
-                    if (Selection != null)
-                    {
-                        Selection.InventoryChanged -= UpdateToolTip;
-                    }
                     Selection = null;
                     if (Unselected != null) Unselected();
-                    UnitInfo.transform.parent.gameObject.SetActive(false);
                     PathTracker.gameObject.SetActive(false);
                 }
             }
@@ -111,11 +102,6 @@ public class Controls : MonoBehaviour
             }
         }
         Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize -= Input.GetAxis("Mouse ScrollWheel") * scrollMultiplier,1,20);
-    }
-
-    void UpdateToolTip()
-    {
-        UnitInfo.text = string.Format("{0}\n{1}/{2} HP\n{3}/{4} Space", Selection.name, (int)Selection.CurrentHealth, Selection.MaxHealth, (int)Selection.StoredAmount, Selection.Capacity);
     }
 
     public void TransferCamera(Vector3 value)

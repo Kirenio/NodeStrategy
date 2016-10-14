@@ -114,4 +114,20 @@ public class Building : MonoBehaviour {
         }
         Debug.Log(content);
     }
+
+    public virtual string GetContentString()
+    {
+        string content = "Stored materials\n";
+        foreach(KeyValuePair<Resource, float> entry in Stored)
+        {
+            if (entry.Value > 0)
+                content += string.Format("{0} {1}\n", entry.Value, entry.Key);
+        }
+        return content;
+    }
+
+    public virtual string GetStatsString()
+    {
+        return string.Format("HP:\t{0}/{1}\nStorage:\t{2}/{3}", CurrentHealth, MaxHealth, StoredAmount, Capacity);
+    }
 }

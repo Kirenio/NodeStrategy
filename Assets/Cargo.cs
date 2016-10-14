@@ -1,4 +1,4 @@
-﻿public enum Resource { Empty, Crystal, BlackSand, DataCrystal }
+﻿public enum Resource { Empty, Crystal, BlackSand, DataCrystal, Minerals, Composites, Electronics }
 
 [System.Serializable]
 public struct Cargo

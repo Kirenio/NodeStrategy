@@ -5,6 +5,7 @@ using System.Collections;
 public class SelectionMenu : MonoBehaviour {
     public Controls controls;
 
+    [Header("Selection menu")]
     public Text MenuHeader;
     public Toggle ShippingButton;
     public Text ShippingButtonText;
@@ -14,9 +15,18 @@ public class SelectionMenu : MonoBehaviour {
     public Toggle PauseButton;
     int TargetToChange;
     CargoCart cart;
+    Building building;
+
+    [Header("Unit menu")]
+    public GameObject InventoryMenu;
+    public Text InventoryHeader;
+    public Slider InventoryBar;
+    public Text InventoryText;
+    public Text Stats;
 
     void Awake () {
         controls.CargoCartSelected += fillMenu;
+        controls.BuildingSelected += fillMenu;
         controls.Unselected += hideMenu;
 
         ResourceButton.ClearOptions();
@@ -28,6 +38,10 @@ public class SelectionMenu : MonoBehaviour {
 	
     void fillMenu(CargoCart value)
     {
+        hideMenu(); // Making sure building will not override inventory if cargo cart was selected without unselecting building first and vise versa
+                    // (!) Need a better solution for the whole unite menu section
+
+        // Filling the Selection menu
         cart = value;
         gameObject.SetActive(true);
         MenuHeader.text = cart.name;
@@ -35,11 +49,47 @@ public class SelectionMenu : MonoBehaviour {
         RecievingButtonText.text = cart.Recieving.name;
         ResourceButton.value = (int)cart.ResourceToShip;
         PauseButton.isOn = cart.Paused;
+
+        // Filling the Unit menu
+        InventoryMenu.SetActive(true);
+        InventoryHeader.text = cart.name + " inventory";
+        cart.InventoryChanged += updateInventoryCart;
+    }
+
+    void fillMenu(Building value)
+    {
+        hideMenu();
+
+        building = value;
+        // Filling the Unit menu
+        InventoryMenu.SetActive(true);
+        InventoryHeader.text = building.name + " inventory";
+        building.InventoryChanged += updateInventoryBuilding;
+    }
+
+    void updateInventoryCart()
+    {
+        InventoryBar.maxValue = cart.Capacity;
+        InventoryBar.value = cart.StoredAmount;
+        InventoryText.text = cart.GetContentString();
+        Stats.text = cart.GetStatsString();
+    }
+
+    void updateInventoryBuilding()
+    {
+        Debug.Log("Updating");
+        InventoryBar.maxValue = building.Capacity;
+        InventoryBar.value = building.StoredAmount;
+        InventoryText.text = building.GetContentString();
+        Stats.text = building.GetStatsString();
     }
 
     void hideMenu()
     {
         gameObject.SetActive(false);
+        InventoryMenu.SetActive(false);
+        if(cart != null)cart.InventoryChanged -= updateInventoryCart;
+        if (building != null) building.InventoryChanged -= updateInventoryBuilding;
     }
 
     public void Locate(int value)
