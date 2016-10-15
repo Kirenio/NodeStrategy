@@ -1,11 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class SelectionPathTracking : MonoBehaviour {
+public class SelectionPathTracking : MonoBehaviour
+{
+    public Controls controls;
+
     CargoCart SelectedObject;
     LineRenderer LRPointer;
+    
+    void Awake()
+    {
+        LRPointer = gameObject.GetComponent<LineRenderer>();
+        gameObject.SetActive(false);
+        controls.CargoCartSelected += SetCartToTrack;
+        controls.Unselected += StopTracking;
+    }
 
-    public void SetCartToTrack(CargoCart cart)
+	void Update () {
+        LRPointer.SetPosition(1, SelectedObject.transform.position);
+    }
+
+    void SetCartToTrack(CargoCart cart)
     {
         SelectedObject = cart;
         LRPointer.SetPosition(0, SelectedObject.Shipping.transform.position);
@@ -13,13 +28,8 @@ public class SelectionPathTracking : MonoBehaviour {
         gameObject.SetActive(true);
     }
 
-    void Awake()
+    void StopTracking()
     {
-        LRPointer = gameObject.GetComponent<LineRenderer>();
         gameObject.SetActive(false);
-    }
-
-	void Update () {
-        LRPointer.SetPosition(1, SelectedObject.transform.position);
     }
 }

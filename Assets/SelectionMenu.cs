@@ -53,6 +53,7 @@ public class SelectionMenu : MonoBehaviour {
         // Filling the Unit menu
         InventoryMenu.SetActive(true);
         InventoryHeader.text = cart.name + " inventory";
+        updateInventoryCart();
         cart.InventoryChanged += updateInventoryCart;
     }
 
@@ -61,9 +62,11 @@ public class SelectionMenu : MonoBehaviour {
         hideMenu();
 
         building = value;
+
         // Filling the Unit menu
         InventoryMenu.SetActive(true);
         InventoryHeader.text = building.name + " inventory";
+        updateInventoryBuilding();
         building.InventoryChanged += updateInventoryBuilding;
     }
 
@@ -122,6 +125,9 @@ public class SelectionMenu : MonoBehaviour {
 
     public void ChangeTarget(int value)
     {
+        controls.CargoCartSelected -= fillMenu; // Disabling the normal selection behaviour
+        controls.BuildingSelected -= fillMenu;
+
         if (ShippingButton.isOn || RecievingButton.isOn)
         {
             Debug.Log("Setting new target");
@@ -152,5 +158,8 @@ public class SelectionMenu : MonoBehaviour {
                 RecievingButton.isOn = false;
                 break;
         }
+
+        controls.CargoCartSelected += fillMenu;
+        controls.BuildingSelected += fillMenu;
     }
 }

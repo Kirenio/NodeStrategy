@@ -12,7 +12,6 @@ public class Controls : MonoBehaviour
     public float mouseSensitivity = 0.3f;
     public float keyboardScrollSpeed = 2f;
     Building Selection;
-    public SelectionPathTracking PathTracker;
     public GameObject BuildingToBuild { get;  set;  }
     public bool InTargetSelectionMode = false;
 
@@ -22,17 +21,7 @@ public class Controls : MonoBehaviour
     
     void Update()
     {
-
-        if (Input.GetKey(KeyCode.W)) CameraAnchor.position += Vector3.forward * keyboardScrollSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.S)) CameraAnchor.position += -Vector3.forward * keyboardScrollSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.A)) CameraAnchor.position += -Vector3.right * keyboardScrollSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.D)) CameraAnchor.position += Vector3.right * keyboardScrollSpeed * Time.deltaTime;
-
-        if (Input.GetMouseButton(0))
-        {
-            CameraAnchor.position += new Vector3(-Input.GetAxis("Mouse X"), 0, -Input.GetAxis("Mouse Y")) * mouseSensitivity;
-        }
-
+        // TODO: Rewrite this to be uniform
         if (Input.GetMouseButtonUp(0))
         {
             if (EventSystem.current.IsPointerOverGameObject()) return;
@@ -43,7 +32,6 @@ public class Controls : MonoBehaviour
                 if (hit.transform.tag == "Moveable")
                 {
                     CargoCart selectedCart = hit.transform.GetComponent<CargoCart>();
-                    PathTracker.SetCartToTrack(selectedCart);
                     if (CargoCartSelected != null) CargoCartSelected(selectedCart);
                     return;
                 }
@@ -57,11 +45,11 @@ public class Controls : MonoBehaviour
                 {
                     Selection = null;
                     if (Unselected != null) Unselected();
-                    PathTracker.gameObject.SetActive(false);
                 }
             }
         }
 
+        // Debug feature
         if (Input.GetMouseButtonUp(2))
         {
             if (EventSystem.current.IsPointerOverGameObject()) return;
@@ -74,7 +62,8 @@ public class Controls : MonoBehaviour
             }
         }
 
-        if(Input.GetMouseButtonUp(1))
+        // TODO: Come up with terrain/resource structure and rewrite this into MouseButton 0
+        if (Input.GetMouseButtonUp(1)) 
         {
             if (EventSystem.current.IsPointerOverGameObject()) return;
 
@@ -86,24 +75,24 @@ public class Controls : MonoBehaviour
                     Instantiate(BuildingToBuild, hit.point, Quaternion.identity);
                 }
             }
-            if(InTargetSelectionMode)
-            {
-                Debug.Log("In Targeting code");
-                RaycastHit hit;
-                if(Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
-                {
-                    Building target = hit.transform.gameObject.GetComponent<Building>();
-                    if (target != null)
-                    {
-                        BuildingSelected(target);
-                        InTargetSelectionMode = false;
-                    }
-                }
-            }
         }
+
+        // Camera pan
+        if (Input.GetMouseButton(1))
+        {
+            CameraAnchor.position += new Vector3(-Input.GetAxis("Mouse X"), 0, -Input.GetAxis("Mouse Y")) * mouseSensitivity;
+        }
+        if (Input.GetKey(KeyCode.W)) CameraAnchor.position += Vector3.forward * keyboardScrollSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.S)) CameraAnchor.position += -Vector3.forward * keyboardScrollSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.A)) CameraAnchor.position += -Vector3.right * keyboardScrollSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.D)) CameraAnchor.position += Vector3.right * keyboardScrollSpeed * Time.deltaTime;
+
+        // Camera zoom
         Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize -= Input.GetAxis("Mouse ScrollWheel") * scrollMultiplier,1,20);
     }
 
+    // Teleport camera to specified position
+    // TODO: make an optional slow transition between current position and target
     public void TransferCamera(Vector3 value)
     {
         CameraAnchor.position = new Vector3(value.x, 0, value.z - 45);
