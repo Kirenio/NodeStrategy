@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class SelectionMenu : MonoBehaviour {
     public Controls controls;
@@ -12,6 +11,7 @@ public class SelectionMenu : MonoBehaviour {
     public Toggle RecievingButton;
     public Text RecievingButtonText;
     public Dropdown ResourceButton;
+    public GameObject ResourceChangeIndicator;
     public Toggle PauseButton;
     int TargetToChange;
     CargoCart cart;
@@ -28,7 +28,7 @@ public class SelectionMenu : MonoBehaviour {
         controls.CargoCartSelected += fillMenu;
         controls.BuildingSelected += fillMenu;
         controls.Unselected += hideMenu;
-
+        ResourceChangeIndicator.SetActive(false);
         ResourceButton.ClearOptions();
         foreach (Resource res in Resource.GetValues(typeof(Resource)))
         {
@@ -43,11 +43,21 @@ public class SelectionMenu : MonoBehaviour {
 
         // Filling the Selection menu
         cart = value;
+
         gameObject.SetActive(true);
         MenuHeader.text = cart.name;
         ShippingButtonText.text = cart.Shipping.name;
         RecievingButtonText.text = cart.Recieving.name;
-        ResourceButton.value = (int)cart.ResourceToShip;
+        if(cart.ResourceChangePending)
+        {
+            ResourceButton.value = (int)cart.ResourceToShipNew;
+            ResourceChangeIndicator.SetActive(true);
+        }
+        else
+        {
+            ResourceButton.value = (int)cart.ResourceToShip;
+            ResourceChangeIndicator.SetActive(false);
+        }
         PauseButton.isOn = cart.Paused;
 
         // Filling the Unit menu
@@ -80,7 +90,6 @@ public class SelectionMenu : MonoBehaviour {
 
     void updateInventoryBuilding()
     {
-        Debug.Log("Updating");
         InventoryBar.maxValue = building.Capacity;
         InventoryBar.value = building.StoredAmount;
         InventoryText.text = building.GetContentString();
@@ -120,7 +129,8 @@ public class SelectionMenu : MonoBehaviour {
 
     public void ChangeResourceToShip()
     {
-        cart.ResourceToShip = (Resource)ResourceButton.value;
+        cart.QueueResourceChange((Resource)ResourceButton.value);
+        ResourceChangeIndicator.SetActive(true);
     }
 
     public void ChangeTarget(int value)

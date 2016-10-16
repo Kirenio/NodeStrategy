@@ -31,13 +31,13 @@ public class Building : MonoBehaviour {
         return new Cargo(type, amount);
     }
 
-    public virtual Cargo Ship (Resource type, float amount)
+    public virtual float Ship (Resource type, float amount)
     {
         if (Stored.ContainsKey(type))
         {
             if (amount > Stored[type])
             {
-                Cargo rValue = CargoCreate(type, Stored[type]);
+                float rValue = Stored[type];
                 StoredAmount -= Stored[type];
                 Stored[type] = 0;
                 if (InventoryChanged != null) InventoryChanged();
@@ -48,13 +48,13 @@ public class Building : MonoBehaviour {
                 Stored[type] -= amount;
                 StoredAmount -= amount;
                 if (InventoryChanged != null) InventoryChanged();
-                return CargoCreate(type, amount);
+                return amount;
             }
         }
-        else return CargoCreate(Resource.Empty, 0);
+        else return 0;
     }
 
-    public virtual Cargo Recieve(Cargo cargo)
+    public virtual float Recieve(Cargo cargo)
     {
         if (StoredAmount + cargo.Amount <= Capacity)
         {
@@ -68,7 +68,7 @@ public class Building : MonoBehaviour {
                 if (LogActivity) LogRecieved(cargo);
 
             if(InventoryChanged != null) InventoryChanged();
-            return CargoCreate(cargo.Type, 0);
+            return 0;
         }
         else if (StoredAmount + cargo.Amount > Capacity)
         {
@@ -85,10 +85,10 @@ public class Building : MonoBehaviour {
                 if (LogActivity) LogRecieved(cargo.Type, spaceFree);
 
                 if (InventoryChanged != null) InventoryChanged();
-                return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
+                return cargo.Amount - spaceFree;
             }
         }
-        return cargo;
+        return cargo.Amount;
     }
     
     protected virtual void LogRecieved(Cargo cargo)

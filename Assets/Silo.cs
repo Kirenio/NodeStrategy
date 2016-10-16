@@ -12,7 +12,7 @@ public class Silo : Building
         SectionSize = SectionCalculateSize();
     }
 
-    public override Cargo Recieve(Cargo cargo)
+    public override float Recieve(Cargo cargo)
     {
         if (Stored.ContainsKey(cargo.Type) && Stored[cargo.Type] != 0)
         {
@@ -24,7 +24,7 @@ public class Silo : Building
                 if (LogActivity) LogRecieved(cargo);
 
                 OnInventoryChanged();
-                return CargoCreate(cargo.Type, 0);
+                return 0;
             }
             else
             {
@@ -37,9 +37,9 @@ public class Silo : Building
                     if (LogActivity) LogRecieved(cargo.Type, spaceFree);
 
                     OnInventoryChanged();
-                    return CargoCreate(cargo.Type, cargo.Amount - spaceFree);
+                    return cargo.Amount - spaceFree;
                 }
-                return cargo;
+                return cargo.Amount;
             }
         }
         else if (SectionsOccopied() < Sections)
@@ -54,9 +54,9 @@ public class Silo : Building
             if (LogActivity) LogRecieved(cargo);
 
             OnInventoryChanged();
-            return CargoCreate(cargo.Type, 0);
+            return 0;
         }
-        return cargo;
+        return cargo.Amount;
     }
 
     int SectionsOccopied()
