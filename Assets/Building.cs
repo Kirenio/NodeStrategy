@@ -10,7 +10,7 @@ public class Building : MonoBehaviour {
     public float StoredAmount = 0;
     public float Capacity;
 
-    public Transform PortPos;
+    public Vector3 PortPos;
 
     public bool LogActivity = false;
 
@@ -22,7 +22,9 @@ public class Building : MonoBehaviour {
 
     protected virtual void Awake()
     {
-        PortPos = transform.GetChild(0).transform;
+        PortPos = transform.GetChild(0).transform.position;
+        PortPos = new Vector3(PortPos.x, 0.00f, PortPos.z);
+        Destroy(transform.GetChild(0).gameObject);
         CurrentHealth = MaxHealth;
     }
     

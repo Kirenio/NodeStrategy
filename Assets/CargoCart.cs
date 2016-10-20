@@ -37,9 +37,9 @@ public class CargoCart : MonoBehaviour {
         if (StoredAmount == 0)
         {
             if (InventoryEmpty != null) InventoryEmpty();
-            transform.LookAt(Shipping.PortPos.position);
-            transform.position = Vector3.MoveTowards(transform.position, Shipping.PortPos.position, Speed * Time.deltaTime);
-            if (transform.position == Shipping.PortPos.position)
+            transform.LookAt(Shipping.PortPos);
+            transform.position = Vector3.MoveTowards(transform.position, Shipping.PortPos, Speed * Time.deltaTime);
+            if (transform.position == Shipping.PortPos)
             {
                 StoredAmount = Shipping.Ship(ResourceToShip, Capacity);
                 OnInventoryChanged();
@@ -47,9 +47,9 @@ public class CargoCart : MonoBehaviour {
         }
         else
         {
-            transform.LookAt(Recieving.PortPos.position);
-            transform.position = Vector3.MoveTowards(transform.position, Recieving.PortPos.position, Speed * Time.deltaTime);
-            if (transform.position == Recieving.PortPos.position)
+            transform.LookAt(Recieving.PortPos);
+            transform.position = Vector3.MoveTowards(transform.position, Recieving.PortPos, Speed * Time.deltaTime);
+            if (transform.position == Recieving.PortPos)
             {
                 StoredAmount = Recieving.Recieve(CargoCreate(ResourceToShip, StoredAmount));
                 OnInventoryChanged();
