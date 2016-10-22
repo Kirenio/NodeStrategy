@@ -15,7 +15,10 @@ public class Controls : MonoBehaviour
     public GameObject BuildingToBuild { get;  set;  }
     public bool InTargetSelectionMode = false;
 
+    bool movingCamera = false;
+
     public event ControlsEvenHandler Unselected;
+    public event ControlsEvenHandlerBuilding BuildingCreated;
     public event ControlsEvenHandlerBuilding BuildingSelected;
     public event ControlsEvenHandlerCargoCart CargoCartSelected;
     
@@ -65,14 +68,24 @@ public class Controls : MonoBehaviour
         // TODO: Come up with terrain/resource structure and rewrite this into MouseButton 0
         if (Input.GetMouseButtonUp(1)) 
         {
-            if (EventSystem.current.IsPointerOverGameObject()) return;
+            if (EventSystem.current.IsPointerOverGameObject() || movingCamera)
+            {
+                movingCamera = false;
+                return;
+            }
 
             if (BuildingToBuild != null)
             {
                 RaycastHit hit;
                 if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
                 {
-                    Instantiate(BuildingToBuild, hit.point, Quaternion.identity);
+                    Debug.Log("Hit tag: "+ hit.transform.tag);
+                    if(hit.transform.tag == "Ground")
+                    {
+                        Debug.Log("Placing: " + BuildingToBuild);
+                        Building newBuilding = ((GameObject)Instantiate(BuildingToBuild, hit.point, Quaternion.identity)).GetComponent<Building>();
+                        if (BuildingCreated != null) BuildingCreated(newBuilding);
+                    }
                 }
             }
         }
@@ -80,7 +93,12 @@ public class Controls : MonoBehaviour
         // Camera pan
         if (Input.GetMouseButton(1))
         {
-            CameraAnchor.position += new Vector3(-Input.GetAxis("Mouse X"), 0, -Input.GetAxis("Mouse Y")) * mouseSensitivity;
+            Vector3 change = new Vector3(-Input.GetAxis("Mouse X"), 0, -Input.GetAxis("Mouse Y")) * mouseSensitivity;
+            if (change != Vector3.zero)
+            {
+                movingCamera = true;
+                CameraAnchor.position += change;
+            }
         }
         if (Input.GetKey(KeyCode.W)) CameraAnchor.position += Vector3.forward * keyboardScrollSpeed * Time.deltaTime;
         if (Input.GetKey(KeyCode.S)) CameraAnchor.position += -Vector3.forward * keyboardScrollSpeed * Time.deltaTime;
