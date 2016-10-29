@@ -15,6 +15,8 @@ public class Building : MonoBehaviour {
     public bool LogActivity = false;
 
     public event BuildingEventHandler InventoryChanged;
+    protected event BuildingEventHandler InventoryChangedInternal;
+
     protected virtual void OnInventoryChanged()
     {
         if (InventoryChanged != null) InventoryChanged();
@@ -69,8 +71,9 @@ public class Building : MonoBehaviour {
 
                 if (LogActivity) LogRecieved(cargo);
 
-            if(InventoryChanged != null) InventoryChanged();
-            return 0;
+            if (InventoryChanged != null) InventoryChanged();
+            if (InventoryChangedInternal != null) InventoryChangedInternal();
+                return 0;
         }
         else if (StoredAmount + cargo.Amount > Capacity)
         {
@@ -87,6 +90,7 @@ public class Building : MonoBehaviour {
                 if (LogActivity) LogRecieved(cargo.Type, spaceFree);
 
                 if (InventoryChanged != null) InventoryChanged();
+                if (InventoryChangedInternal != null) InventoryChangedInternal();
                 return cargo.Amount - spaceFree;
             }
         }

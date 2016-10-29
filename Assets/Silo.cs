@@ -73,4 +73,9 @@ public class Silo : Building
     {
         return Capacity / Sections;
     }
+
+    public override string GetStatsString()
+    {
+        return string.Format("HP:\t{0}/{1}\nStorage:\t{2}/{3}\nSections\nAmount\t{4}\nSize\t{5}", CurrentHealth, MaxHealth, StoredAmount, Capacity, Sections, SectionSize);
+    }
 }

@@ -8,6 +8,7 @@ public class CargoCart : MonoBehaviour {
     public float Capacity;
     public float Speed;
     public bool Paused = false;
+    bool waitingCargo = false;
     public bool ResourceChangePending = false;
 
     public Resource ResourceToShip;
@@ -47,12 +48,20 @@ public class CargoCart : MonoBehaviour {
         }
         else
         {
-            transform.LookAt(Recieving.PortPos);
-            transform.position = Vector3.MoveTowards(transform.position, Recieving.PortPos, Speed * Time.deltaTime);
-            if (transform.position == Recieving.PortPos)
+            if (!waitingCargo)
             {
-                StoredAmount = Recieving.Recieve(CargoCreate(ResourceToShip, StoredAmount));
-                OnInventoryChanged();
+                transform.LookAt(Recieving.PortPos);
+                transform.position = Vector3.MoveTowards(transform.position, Recieving.PortPos, Speed * Time.deltaTime);
+                if (transform.position == Recieving.PortPos)
+                {
+                    StoredAmount = Recieving.Recieve(CargoCreate(ResourceToShip, StoredAmount));
+                    if (StoredAmount != 0)
+                    {
+                        waitingCargo = true;
+                        Recieving.InventoryChanged += StopWatingCargo;
+                    }
+                    OnInventoryChanged();
+                }
             }
         }
     }
@@ -60,6 +69,12 @@ public class CargoCart : MonoBehaviour {
     public virtual Cargo CargoCreate(Resource type, float amount)
     {
         return new Cargo(type, amount);
+    }
+
+    void StopWatingCargo()
+    {
+        waitingCargo = true;
+        Recieving.InventoryChanged -= StopWatingCargo;
     }
 
     public void QueueResourceChange(Resource value)
@@ -78,6 +93,7 @@ public class CargoCart : MonoBehaviour {
             InventoryEmpty -= ChangeResource;
         }
     }
+
     public virtual void DumpCargo()
     {
         StoredAmount = 0;

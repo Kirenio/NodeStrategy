@@ -3,11 +3,19 @@
 public class Extractor : Building {
     public Resource producedResource;
     public float extractionRate;
+    public float extractionTime;
+    bool storageFull = false;
+    float nextExtraction;
 
     protected override void Awake()
     {
         base.Awake();
         Recieve(CargoCreate(producedResource, 0));
+    }
+
+    void Start()
+    {
+        nextExtraction = Time.time + extractionTime;
     }
 
     void LogExtracted(float amount)
@@ -16,23 +24,39 @@ public class Extractor : Building {
     }
     void Update()
     {
-        if(Stored.ContainsKey(producedResource))
+        if (!storageFull && Time.time > nextExtraction)
         {
-            float extractedAmount = extractionRate * Time.deltaTime;
-            if (Stored[producedResource] + extractedAmount < Capacity)
+            if (Stored.ContainsKey(producedResource))
             {
-                Stored[producedResource] += extractedAmount;
-                StoredAmount += extractedAmount;
-                if (LogActivity) LogExtracted(extractedAmount);
-                OnInventoryChanged();
+                if (Stored[producedResource] + extractionRate < Capacity)
+                {
+                    Stored[producedResource] += extractionRate;
+                    StoredAmount += extractionRate;
+                    if (LogActivity) LogExtracted(extractionRate);
+                    OnInventoryChanged();
+                }
+                else
+                {
+                    if (LogActivity) LogExtracted(Capacity - StoredAmount);
+                    Stored[producedResource] = Capacity;
+                    StoredAmount = Capacity;
+                    storageFull = true;
+                    OnInventoryChanged();
+                }
             }
-            else
-            {
-                if (LogActivity) LogExtracted(Capacity - StoredAmount);
-                Stored[producedResource] = Capacity;
-                StoredAmount = Capacity;
-                OnInventoryChanged();
-            }
+            nextExtraction += extractionTime;
         }
+    }
+
+    public override float Ship(Resource type, float amount)
+    {
+        nextExtraction = Time.time + extractionTime;
+        storageFull = false;
+        return base.Ship(type, amount);
+    }
+
+    public override string GetStatsString()
+    {
+        return string.Format("HP:\t{0}/{1}\nStorage:\t{2}/{3}\nExtraction\nRate:\t{4}\nTime\t{5}s", CurrentHealth, MaxHealth, StoredAmount, Capacity, extractionRate, extractionTime);
     }
 }
