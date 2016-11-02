@@ -12,8 +12,15 @@ public class Controls : MonoBehaviour
     public float mouseSensitivity = 0.3f;
     public float keyboardScrollSpeed = 2f;
     Building Selection;
-    public GameObject BuildingToBuild { get;  set;  }
+    public string BuildingToBuild { get;  set; }
     public bool InTargetSelectionMode = false;
+    [Header("Prefabs of game buildings")]
+    public ConstructionSite ConstructionSitePrefab;
+    public Extractor ExtractorPrefab;
+    public Silo SiloPrefab;
+    public Manufactory ManufactoryPrefab;
+    public Warehouse WarehousePrefab;
+    public Extractor BlackSandExtractorPreafab;
 
     bool movingCamera = false;
 
@@ -83,7 +90,8 @@ public class Controls : MonoBehaviour
                     if(hit.transform.tag == "Ground")
                     {
                         Debug.Log("Placing: " + BuildingToBuild);
-                        Building newBuilding = ((GameObject)Instantiate(BuildingToBuild, hit.point, Quaternion.identity)).GetComponent<Building>();
+                        ConstructionSite newBuilding = ((ConstructionSite)Instantiate(ConstructionSitePrefab, hit.point, Quaternion.identity)).GetComponent<ConstructionSite>();
+                        newBuilding.SetOrder(this);
                         if (BuildingCreated != null) BuildingCreated(newBuilding);
                     }
                 }
@@ -106,7 +114,7 @@ public class Controls : MonoBehaviour
         if (Input.GetKey(KeyCode.D)) CameraAnchor.position += Vector3.right * keyboardScrollSpeed * Time.deltaTime;
 
         // Camera zoom
-        Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize -= Input.GetAxis("Mouse ScrollWheel") * scrollMultiplier,1,20);
+        if (!EventSystem.current.IsPointerOverGameObject()) Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize -= Input.GetAxis("Mouse ScrollWheel") * scrollMultiplier,1,20);
     }
 
     // Teleport camera to specified position

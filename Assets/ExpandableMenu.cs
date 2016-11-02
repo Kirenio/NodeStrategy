@@ -3,12 +3,12 @@ using System.Collections;
 
 public class ExpandableMenu : MonoBehaviour {
     public Animator animator;
-    bool state = true;
+    public bool Closed = true;
 
     public void ChangeState()
     {
-        if (state) animator.Play("BuildingMenuExpand");
+        if (Closed) animator.Play("BuildingMenuExpand");
         else animator.Play("BuildingMenuCollapse");
-        state = !state;
+        Closed = !Closed;
     }
 }

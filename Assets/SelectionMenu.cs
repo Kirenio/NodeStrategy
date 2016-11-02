@@ -11,6 +11,7 @@ public class SelectionMenu : MonoBehaviour {
     public Toggle RecievingButton;
     public Text RecievingButtonText;
     public Dropdown ResourceButton;
+    public Text ResourceButtonText;
     public GameObject ResourceChangeIndicator;
     public Toggle PauseButton;
     int TargetToChange;
@@ -34,6 +35,7 @@ public class SelectionMenu : MonoBehaviour {
         {
             ResourceButton.options.Add(new Dropdown.OptionData(res.ToString()));
         }
+        hideMenu();
 	}
 	
     void fillMenu(CargoCart value)
@@ -46,19 +48,17 @@ public class SelectionMenu : MonoBehaviour {
 
         gameObject.SetActive(true);
         MenuHeader.text = cart.name;
-        ShippingButtonText.text = cart.Shipping.name;
-        RecievingButtonText.text = cart.Recieving.name;
-        if(cart.ResourceChangePending)
-        {
-            ResourceButton.value = (int)cart.ResourceToShipNew;
-            ResourceChangeIndicator.SetActive(true);
-        }
-        else
-        {
-            ResourceButton.value = (int)cart.ResourceToShip;
-            ResourceChangeIndicator.SetActive(false);
-        }
+        ShippingButtonText.text = cart.ShippingName;
+        RecievingButtonText.text = cart.RecievingName;
         PauseButton.isOn = cart.Paused;
+        
+        ResourceChangeIndicator.SetActive(cart.ResourceChangePending);
+        if (cart.ResourceChangePending)
+        {
+            ResourceButtonText.text = cart.ResourceToShipNew.ToString();
+            cart.ResourceToShipChanged += ResourceToShipChanged;
+        }
+        else ResourceButtonText.text = cart.ResourceToShip.ToString();
 
         // Filling the Unit menu
         InventoryMenu.SetActive(true);
@@ -100,7 +100,11 @@ public class SelectionMenu : MonoBehaviour {
     {
         gameObject.SetActive(false);
         InventoryMenu.SetActive(false);
-        if(cart != null)cart.InventoryChanged -= updateInventoryCart;
+        if (cart != null)
+        {
+            cart.InventoryChanged -= updateInventoryCart;
+            cart.ResourceToShipChanged -= ResourceToShipChanged;
+        }
         if (building != null) building.InventoryChanged -= updateInventoryBuilding;
     }
 
@@ -131,6 +135,13 @@ public class SelectionMenu : MonoBehaviour {
     {
         cart.QueueResourceChange((Resource)ResourceButton.value);
         ResourceChangeIndicator.SetActive(true);
+        cart.ResourceToShipChanged += ResourceToShipChanged;
+    }
+
+    void ResourceToShipChanged()
+    {
+        ResourceChangeIndicator.SetActive(false);
+        cart.ResourceToShipChanged -= ResourceToShipChanged;
     }
 
     public void ChangeTarget(int value)

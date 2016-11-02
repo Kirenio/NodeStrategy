@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class Player : MonoBehaviour {
+    public bool CanBuild { get; private set; }
     public Controls controls;
     public Text StructuresList;
     string Name;

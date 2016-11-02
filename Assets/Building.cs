@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 public delegate void BuildingEventHandler();
 
-public class Building : MonoBehaviour {
+public class Building : MonoBehaviour
+{
     public float CurrentHealth;
     public float MaxHealth;
     public Dictionary<Resource, float> Stored = new Dictionary<Resource, float>();
@@ -20,6 +21,11 @@ public class Building : MonoBehaviour {
     protected virtual void OnInventoryChanged()
     {
         if (InventoryChanged != null) InventoryChanged();
+    }
+
+    protected virtual void OnInventoryChangedInternal()
+    {
+        if (InventoryChangedInternal != null) InventoryChangedInternal();
     }
 
     protected virtual void Awake()

@@ -9,17 +9,20 @@ public class CargoCart : MonoBehaviour {
     public float Speed;
     public bool Paused = false;
     bool waitingCargo = false;
-    public bool ResourceChangePending = false;
+    public bool ResourceChangePending { get; protected set; }
 
     public Resource ResourceToShip;
-    public Resource ResourceToShipNew { get; private set; }
+    public Resource ResourceToShipNew { get; protected set; }
     public float StoredAmount;
 
     public Building Shipping;
+    public string ShippingName { get { if (Shipping == null) return "N/A"; else return Shipping.name; } }
     public Building Recieving;
+    public string RecievingName { get { if (Recieving == null) return "N/A"; else return Recieving.name; } }
 
     public CargoCartEventHandler InventoryChanged;
     public CargoCartEventHandler InventoryEmpty;
+    public CargoCartEventHandler ResourceToShipChanged;
 
     void OnInventoryChanged()
     {
@@ -29,6 +32,8 @@ public class CargoCart : MonoBehaviour {
     protected void Awake()
     {
         CurrentHealth = MaxHealth;
+        ResourceChangePending = false;
+        if (Shipping == null || Recieving == null) Paused = true;
     }
 
     void Update()
@@ -79,6 +84,7 @@ public class CargoCart : MonoBehaviour {
 
     public void QueueResourceChange(Resource value)
     {
+        Debug.Log("Queueing a new resource to ship!");
         ResourceChangePending = true;
         ResourceToShipNew = value;
         InventoryEmpty += ChangeResource;
@@ -88,8 +94,10 @@ public class CargoCart : MonoBehaviour {
     {
         if(StoredAmount == 0)
         {
+            Debug.Log("Resource changed successfully!");
             ResourceToShip = ResourceToShipNew;
             ResourceChangePending = false;
+            if (ResourceToShipChanged != null) ResourceToShipChanged();
             InventoryEmpty -= ChangeResource;
         }
     }

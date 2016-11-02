@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
-public class Extractor : Building {
+public class Extractor : Building
+{
     public Resource producedResource;
     public float extractionRate;
     public float extractionTime;
@@ -57,6 +58,6 @@ public class Extractor : Building {
 
     public override string GetStatsString()
     {
-        return string.Format("HP:\t{0}/{1}\nStorage:\t{2}/{3}\nExtraction\nRate:\t{4}\nTime\t{5}s", CurrentHealth, MaxHealth, StoredAmount, Capacity, extractionRate, extractionTime);
+        return string.Format("HP:\t{0}/{1}\nStorage:\t{2}/{3}\nExtraction\n{4} {5}\nTime:\t{6}s", CurrentHealth, MaxHealth, StoredAmount, Capacity, extractionRate, producedResource, extractionTime);
     }
 }

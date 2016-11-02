@@ -1,7 +1,4 @@
-﻿
-using UnityEngine;
-
-public class Silo : Building
+﻿public class Silo : Building
 {
     public int Sections = 1;
     float SectionSize;
