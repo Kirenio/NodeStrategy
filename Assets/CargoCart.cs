@@ -9,6 +9,7 @@ public class CargoCart : MonoBehaviour {
     public float Speed;
     public bool Paused = false;
     bool waitingCargo = false;
+    public bool ReturningCargo = false;
     public bool ResourceChangePending { get; protected set; }
 
     public Resource ResourceToShip;
@@ -23,6 +24,7 @@ public class CargoCart : MonoBehaviour {
     public CargoCartEventHandler InventoryChanged;
     public CargoCartEventHandler InventoryEmpty;
     public CargoCartEventHandler ResourceToShipChanged;
+    public CargoCartEventHandler PauseEbabled;
 
     void OnInventoryChanged()
     {
@@ -39,6 +41,25 @@ public class CargoCart : MonoBehaviour {
     void Update()
     {
         if (Paused) return;
+
+        if (ReturningCargo)
+        {
+            transform.LookAt(Shipping.PortPos);
+            transform.position = Vector3.MoveTowards(transform.position, Shipping.PortPos, Speed * Time.deltaTime);
+            if (transform.position == Shipping.PortPos)
+            {
+                StoredAmount = Shipping.Recieve(CargoCreate(ResourceToShip, StoredAmount));
+                if (StoredAmount == 0)
+                {
+                    ReturningCargo = false;
+                    Paused = true;
+                    if (InventoryEmpty != null) InventoryEmpty();
+                    if (PauseEbabled != null) PauseEbabled();
+                }
+                OnInventoryChanged();
+            }
+            return;
+        }
 
         if (StoredAmount == 0)
         {

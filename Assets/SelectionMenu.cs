@@ -14,6 +14,7 @@ public class SelectionMenu : MonoBehaviour {
     public Text ResourceButtonText;
     public GameObject ResourceChangeIndicator;
     public Toggle PauseButton;
+    public Image ReturnCargoButton;
     int TargetToChange;
     CargoCart cart;
     Building building;
@@ -29,6 +30,7 @@ public class SelectionMenu : MonoBehaviour {
         controls.CargoCartSelected += fillMenu;
         controls.BuildingSelected += fillMenu;
         controls.Unselected += hideMenu;
+
         ResourceChangeIndicator.SetActive(false);
         ResourceButton.ClearOptions();
         foreach (Resource res in Resource.GetValues(typeof(Resource)))
@@ -45,13 +47,16 @@ public class SelectionMenu : MonoBehaviour {
 
         // Filling the Selection menu
         cart = value;
+        controls.ShiftPressed += FastTargeting;
 
         gameObject.SetActive(true);
         MenuHeader.text = cart.name;
         ShippingButtonText.text = cart.ShippingName;
         RecievingButtonText.text = cart.RecievingName;
         PauseButton.isOn = cart.Paused;
-        
+        cart.PauseEbabled += updateConditionalButtons;
+        ReturnCargoButton.enabled = cart.ReturningCargo;
+
         ResourceChangeIndicator.SetActive(cart.ResourceChangePending);
         if (cart.ResourceChangePending)
         {
@@ -96,6 +101,12 @@ public class SelectionMenu : MonoBehaviour {
         Stats.text = building.GetStatsString();
     }
 
+    void updateConditionalButtons()
+    {
+        PauseButton.isOn = cart.Paused;
+        ReturnCargoButton.enabled = cart.ReturningCargo;
+    }
+
     void hideMenu()
     {
         gameObject.SetActive(false);
@@ -104,6 +115,8 @@ public class SelectionMenu : MonoBehaviour {
         {
             cart.InventoryChanged -= updateInventoryCart;
             cart.ResourceToShipChanged -= ResourceToShipChanged;
+            controls.ShiftPressed -= FastTargeting;
+            cart.PauseEbabled -= updateConditionalButtons;
         }
         if (building != null) building.InventoryChanged -= updateInventoryBuilding;
     }
@@ -126,6 +139,13 @@ public class SelectionMenu : MonoBehaviour {
         cart.DumpCargo();
     }
 
+    public void OrderReturnCargo()
+    {
+        Debug.Log("Ordering return of the cargo!");
+        cart.ReturningCargo = !cart.ReturningCargo;
+        ReturnCargoButton.enabled = true;
+    }
+
     public void PauseCart()
     {
         cart.Paused = PauseButton.isOn;
@@ -133,6 +153,7 @@ public class SelectionMenu : MonoBehaviour {
 
     public void ChangeResourceToShip()
     {
+        Debug.Log("Asking CargoCart to queue a new resource to ship!");
         cart.QueueResourceChange((Resource)ResourceButton.value);
         ResourceChangeIndicator.SetActive(true);
         cart.ResourceToShipChanged += ResourceToShipChanged;
@@ -182,5 +203,58 @@ public class SelectionMenu : MonoBehaviour {
 
         controls.CargoCartSelected += fillMenu;
         controls.BuildingSelected += fillMenu;
+    }
+
+    void SetTargetFast(Building target)
+    {
+        switch (TargetToChange)
+        {
+            case 0:
+                cart.Shipping = target;
+                ShippingButtonText.text = cart.Shipping.name;
+                ShippingButton.isOn = false;
+                RecievingButton.isOn = true; // Setting up for the next change
+                TargetToChange = 1;
+                break;
+            case 1:
+                cart.Recieving = target;
+                RecievingButtonText.text = cart.Recieving.name;
+                RecievingButton.isOn = false;
+                FastTargetingStop();
+                break;
+        }
+    }
+
+    void FastTargeting()
+    {
+        Debug.Log("Fast targeting is on");
+        controls.ShiftPressed -= FastTargeting;
+        controls.ShiftReleased += FastTargetingStop; // Subscribing in case player releases the shift button
+
+        controls.CargoCartSelected -= fillMenu; // Disabling the normal selection behaviour
+        controls.BuildingSelected -= fillMenu;
+        controls.Unselected -= hideMenu;
+        ShippingButton.isOn = true; // Highlighting the button to show what will be changed
+
+        TargetToChange = 0; // Setting the default target to change
+        controls.BuildingSelected += SetTargetFast;
+        controls.InTargetSelectionMode = true;
+    }
+
+    void FastTargetingStop()
+    {
+        Debug.Log("Fast targeting is off");
+        controls.ShiftReleased -= FastTargetingStop;
+        controls.ShiftPressed += FastTargeting;
+
+        controls.BuildingSelected -= SetTargetFast;
+        controls.InTargetSelectionMode = false;
+
+        ShippingButton.isOn = false;
+        RecievingButton.isOn = false;
+
+        controls.CargoCartSelected += fillMenu; // Finaly return the normal selection behaviour
+        controls.BuildingSelected += fillMenu;
+        controls.Unselected += hideMenu;
     }
 }

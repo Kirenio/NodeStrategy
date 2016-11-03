@@ -12,6 +12,7 @@ public class Controls : MonoBehaviour
     public float mouseSensitivity = 0.3f;
     public float keyboardScrollSpeed = 2f;
     Building Selection;
+    CargoCart selectionCart;
     public string BuildingToBuild { get;  set; }
     public bool InTargetSelectionMode = false;
     [Header("Prefabs of game buildings")]
@@ -25,6 +26,8 @@ public class Controls : MonoBehaviour
     bool movingCamera = false;
 
     public event ControlsEvenHandler Unselected;
+    public event ControlsEvenHandler ShiftPressed;
+    public event ControlsEvenHandler ShiftReleased;
     public event ControlsEvenHandlerBuilding BuildingCreated;
     public event ControlsEvenHandlerBuilding BuildingSelected;
     public event ControlsEvenHandlerCargoCart CargoCartSelected;
@@ -41,8 +44,8 @@ public class Controls : MonoBehaviour
             {
                 if (hit.transform.tag == "Moveable")
                 {
-                    CargoCart selectedCart = hit.transform.GetComponent<CargoCart>();
-                    if (CargoCartSelected != null) CargoCartSelected(selectedCart);
+                    selectionCart = hit.transform.GetComponent<CargoCart>();
+                    if (CargoCartSelected != null) CargoCartSelected(selectionCart);
                     return;
                 }
 
@@ -112,6 +115,24 @@ public class Controls : MonoBehaviour
         if (Input.GetKey(KeyCode.S)) CameraAnchor.position += -Vector3.forward * keyboardScrollSpeed * Time.deltaTime;
         if (Input.GetKey(KeyCode.A)) CameraAnchor.position += -Vector3.right * keyboardScrollSpeed * Time.deltaTime;
         if (Input.GetKey(KeyCode.D)) CameraAnchor.position += Vector3.right * keyboardScrollSpeed * Time.deltaTime;
+
+        if(Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            if (ShiftPressed != null)
+            {
+                Debug.Log("Shift pressed!");
+                ShiftPressed();
+            }
+        }
+        
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            if (ShiftReleased != null)
+            {
+                Debug.Log("Shift released!");
+                ShiftReleased();
+            }
+        }
 
         // Camera zoom
         if (!EventSystem.current.IsPointerOverGameObject()) Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize -= Input.GetAxis("Mouse ScrollWheel") * scrollMultiplier,1,20);
