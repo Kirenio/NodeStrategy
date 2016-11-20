@@ -43,7 +43,7 @@ public class SelectionMenu : MonoBehaviour {
     void fillMenu(CargoCart value)
     {
         hideMenu(); // Making sure building will not override inventory if cargo cart was selected without unselecting building first and vise versa
-                    // (!) Need a better solution for the whole unite menu section
+                    // (!) Need a better solution for the whole unit menu section
 
         // Filling the Selection menu
         cart = value;
@@ -58,10 +58,11 @@ public class SelectionMenu : MonoBehaviour {
         ReturnCargoButton.enabled = cart.ReturningCargo;
 
         ResourceChangeIndicator.SetActive(cart.ResourceChangePending);
+        cart.ResourceToShipChanged += ResourceToShipChanged;
+        cart.ResourceChangeQueued += updateResourceButton;
         if (cart.ResourceChangePending)
         {
             ResourceButtonText.text = cart.ResourceToShipNew.ToString();
-            cart.ResourceToShipChanged += ResourceToShipChanged;
         }
         else ResourceButtonText.text = cart.ResourceToShip.ToString();
 
@@ -107,6 +108,12 @@ public class SelectionMenu : MonoBehaviour {
         ReturnCargoButton.enabled = cart.ReturningCargo;
     }
 
+    void updateResourceButton()
+    {
+        ResourceChangeIndicator.SetActive(true);
+        ResourceButtonText.text = cart.ResourceToShipNew.ToString();
+    }
+
     void hideMenu()
     {
         gameObject.SetActive(false);
@@ -117,6 +124,7 @@ public class SelectionMenu : MonoBehaviour {
             cart.ResourceToShipChanged -= ResourceToShipChanged;
             controls.ShiftPressed -= FastTargeting;
             cart.PauseEbabled -= updateConditionalButtons;
+            cart.ResourceChangeQueued -= updateResourceButton;
         }
         if (building != null) building.InventoryChanged -= updateInventoryBuilding;
     }

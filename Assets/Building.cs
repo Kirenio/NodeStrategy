@@ -8,7 +8,9 @@ public class Building : MonoBehaviour
     public float CurrentHealth;
     public float MaxHealth;
     public Dictionary<Resource, float> Stored = new Dictionary<Resource, float>();
+    public Dictionary<Resource, float> ResourcesIncoming;
     public float StoredAmount = 0;
+    public float IncomingAmount = 0;
     public float Capacity;
 
     public Vector3 PortPos;
@@ -34,6 +36,7 @@ public class Building : MonoBehaviour
         PortPos = new Vector3(PortPos.x, 0.00f, PortPos.z);
         Destroy(transform.GetChild(0).gameObject);
         CurrentHealth = MaxHealth;
+        ResourcesIncoming = new Dictionary<Resource, float>();
     }
     
     public virtual Cargo CargoCreate(Resource type, float amount)
@@ -101,6 +104,40 @@ public class Building : MonoBehaviour
             }
         }
         return cargo.Amount;
+    }
+
+    public virtual void RegisterShipment(Resource resource, float amount)
+    {
+        if(ResourcesIncoming.ContainsKey(resource))
+        {
+            ResourcesIncoming[resource] += amount;
+            Debug.Log("Registered " + ResourcesIncoming[resource] + " " + resource);
+        }
+        else
+        {
+            ResourcesIncoming.Add(resource, amount);
+            Debug.Log("Registered new " + ResourcesIncoming[resource] + " " + resource);
+        }
+        IncomingAmount += amount;
+    }
+
+    public virtual void UpdateShipment(Resource resource, float amount)
+    {
+        if (ResourcesIncoming.ContainsKey(resource))
+        {
+            ResourcesIncoming[resource] -= amount;
+        }
+        else
+        {
+            Debug.LogWarning("Shipping info was missing!");
+            ResourcesIncoming.Add(resource, amount);
+        }
+        IncomingAmount -= amount;
+    }
+
+    public virtual float Quota(Resource resource, float amount)
+    {
+        return Capacity + amount - (StoredAmount + IncomingAmount);
     }
     
     protected virtual void LogRecieved(Cargo cargo)

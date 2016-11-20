@@ -6,9 +6,15 @@ public class ConstructionSite : Building {
     string BuildingType;
     Building FinalBuilding;
 
-	// Use this for initialization
-	protected override void Awake () {
+    // Use this for initialization
+    protected override void Awake () {
         base.Awake();
+        string content = "";
+        foreach (KeyValuePair<Resource, float> entry in Stored)
+        {
+            content += string.Format("{0} {1}; ", entry.Value, entry.Key);
+        }
+        Debug.LogWarning(content);
     }
 
 	public void SetOrder(Controls value)
@@ -18,7 +24,14 @@ public class ConstructionSite : Building {
         SetFinalBuilding();
         Debug.Log(FinalBuilding.GetType().ToString());
         InventoryChangedInternal += CheckConditions;
+
+        ResourcesIncoming = new Dictionary<Resource, float>(Stored);
+        foreach (KeyValuePair<Resource, float> entry in Stored)
+        {
+            ResourcesIncoming[entry.Key] = 0;
+        }
     }
+
 	// Update is called once per frame
 	void CheckConditions() {
         if (StoredAmount >= Capacity)
@@ -97,8 +110,9 @@ public class ConstructionSite : Building {
     {
         if (Stored.ContainsKey(cargo.Type))
         {
-            if (StoredAmount + cargo.Amount <= GameData.Prices[BuildingType][cargo.Type])
+            if (Stored[cargo.Type] - cargo.Amount >= 0)
             {
+                Debug.Log(Stored[cargo.Type] - cargo.Amount + " " + cargo.Type + " was higher or equal to 0");
                 Stored[cargo.Type] -= cargo.Amount;
                 StoredAmount += cargo.Amount;
 
@@ -108,8 +122,9 @@ public class ConstructionSite : Building {
                 OnInventoryChangedInternal();
                 return 0;
             }
-            else if (StoredAmount + cargo.Amount > GameData.Prices[BuildingType][cargo.Type])
+            else if (Stored[cargo.Type] - cargo.Amount < 0)
             {
+                Debug.Log(Stored[cargo.Type] - cargo.Amount + " " + cargo.Type + " was less than 0");
                 float rValue = cargo.Amount - Stored[cargo.Type];
                 StoredAmount += Stored[cargo.Type];
 
@@ -123,6 +138,22 @@ public class ConstructionSite : Building {
             }
         }
         return cargo.Amount;
+    }
+
+    public override float Quota(Resource resource, float amount)
+    {
+        Debug.LogWarning("Calculating Quota!");
+        if (Stored.ContainsKey(resource))
+        {
+            Debug.LogWarning(string.Format("Key:" + resource + " s:"+ Stored[resource]+" a:" + amount + " ra:"+ResourcesIncoming[resource]));
+            return Stored[resource] + amount - ResourcesIncoming[resource];
+        }
+        else
+        {
+            Debug.LogWarning(name + " Resource Key was missing!");
+            return 0;
+        }
+        Debug.LogWarning("Did not catch!");
     }
 
     public override string GetContentString()
